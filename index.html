@@ -560,20 +560,48 @@
                 activeFocusIndex = (activeFocusIndex - 1 + interactableElements.length) % interactableElements.length;
                 interactableElements[activeFocusIndex].focus();
             }
-            else if (event.key === 'Enter') {
-                // Meta Glasses hardware translates the "Index Pinch" gesture directly into an Enter key event.
-                // Fire programmatic activation trigger directly onto targeted focus vector item
-                if (interactableElements[activeFocusIndex]) {
-                    interactableElements[activeFocusIndex].click();
-                }
+        else if (event.key === 'Enter') {
+            // Wristband Gesture: Index Pinch (Index finger to thumb)
+            // If the cursor is on the Deal button (index 5), hit it. Otherwise, toggle hold on the card.
+            if (activeFocusIndex === 5) {
+                executeGameAction(); 
+            } else if (activeFocusIndex < 5) {
+                toggleCardHold(activeFocusIndex); 
             }
-            else if (event.key === ' ' || event.key === 'Spacebar') {
-                // Standard desktop developer fallback space trigger mappings
-                if (interactableElements[activeFocusIndex]) {
-                    interactableElements[activeFocusIndex].click();
-                }
+        }
+        else if (event.key === 'Escape' || event.key === 'Backspace') {
+            // Wristband Gesture: Middle Finger Pinch (Middle finger to thumb)
+            // Instantly deals or draws without needing to swipe all the way to the button
+            executeGameAction();
+        }
+    });
+
+    // Helper to handle card highlights cleanly via the wristband index tracker
+    function highlightCurrentCard() {
+        cardsRow.forEach((card, idx) => {
+            if (idx === activeFocusIndex && gameState === "DEAL") {
+                card.style.borderColor = "#ffd700";
+                card.style.transform = "scale(1.05)";
+                card.style.boxShadow = "0 0 12px #ffd700";
+            } else {
+                card.style.transform = "scale(1.0)";
+                card.style.boxShadow = "none";
+                card.style.borderColor = card.classList.contains('held') ? "#ff3333" : "transparent";
             }
         });
-    </script>
+
+        // Highlight the main deal button if selected
+        if (activeFocusIndex === 5) {
+            actionBtn.style.borderColor = "#ffffff";
+            actionBtn.style.boxShadow = "0 0 15px #ffd700";
+            actionBtn.style.transform = "scale(1.05)";
+        } else {
+            actionBtn.style.borderColor = "transparent";
+            actionBtn.style.boxShadow = "0 4px 6px rgba(0,0,0,0.3)";
+            actionBtn.style.transform = "scale(1.0)";
+        }
+    }
+</script>
+
 </body>
 </html>
