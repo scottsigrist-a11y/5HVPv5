@@ -3,13 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Meta Glasses 5-Hand Video Poker</title>
+    <title>Meta Display 5-Hand Video Poker</title>
     <style>
+        /* Meta Glasses Waveguide Optimization Matrix */
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
             width: 600px;
             height: 600px;
-            background-color: #000000;
+            background-color: #000000; /* Pure black renders as 100% clear glass transparent texturing */
             color: #ffffff;
             font-family: 'Courier New', Courier, monospace;
             overflow: hidden;
@@ -17,7 +18,10 @@
             flex-direction: column;
             justify-content: space-between;
             padding: 10px;
+            outline: none; /* Removes active blue focus highlight ring from body box */
         }
+
+        /* VideoPoker.com Classic Style Header Layer */
         #header-hud {
             display: flex;
             justify-content: space-between;
@@ -28,6 +32,7 @@
             font-weight: bold;
             text-transform: uppercase;
         }
+
         #main-board {
             display: flex;
             flex-direction: row;
@@ -35,6 +40,8 @@
             gap: 8px;
             margin-top: 5px;
         }
+
+        /* Left Column: Multi-Hand Payout Registry Display */
         #payout-registry-panel {
             width: 200px;
             border: 2px solid #0000ff;
@@ -55,6 +62,8 @@
             color: #000000;
             font-weight: bold;
         }
+
+        /* Right Column: Multi-Hand Layout Viewport Stack */
         #game-lanes-container {
             flex: 1;
             display: flex;
@@ -62,6 +71,7 @@
             justify-content: space-between;
             height: 100%;
         }
+
         .poker-hand-lane {
             display: flex;
             justify-content: space-between;
@@ -76,6 +86,8 @@
             background: #00008b;
             border: 2px solid #ffd700;
         }
+
+        /* Focusable Hardware Buttons Acting as Grid Target Selectors */
         .poker-card-button {
             flex: 1;
             margin: 0 2px;
@@ -92,8 +104,11 @@
             padding: 4px 0;
             cursor: pointer;
             outline: none;
+            transition: transform 0.05s;
         }
         .poker-card-button.red-card { color: #ff0000; }
+        
+        /* High Contrast Focus Frame managed purely via custom CSS tracking class */
         .poker-card-button.active-cursor {
             border-color: #00ff00 !important;
             box-shadow: 0 0 10px #00ff00;
@@ -114,6 +129,8 @@
         .poker-card-button.card-is-held .hold-tab-indicator {
             visibility: visible;
         }
+
+        /* Background Cards Used to Show Remaining Background Hands */
         .micro-card-node {
             flex: 1;
             margin: 0 2px;
@@ -128,6 +145,8 @@
         }
         .micro-card-node.red-card { color: #ff0000; }
         .micro-card-node.micro-held { background: #ffcccc; border: 1px solid #ff0000; }
+
+        /* Navigation Chrome Bottom Panel Controls */
         #bottom-control-shelf {
             height: 60px;
             display: flex;
@@ -150,6 +169,8 @@
             color: #000000 !important;
             box-shadow: 0 0 12px #00ff00;
         }
+
+        /* Pop-up Overlay Panel for Final Win tallies */
         #tally-popup-shield {
             position: absolute;
             top: 150px; left: 100px;
@@ -165,6 +186,8 @@
             text-align: center;
             box-shadow: 0 0 25px rgba(255, 215, 0, 0.5);
         }
+
+        /* Paytable Modal Screen Overlay Layout */
         #paytable-modal-layer {
             position: absolute;
             top: 20px; left: 20px;
@@ -178,13 +201,19 @@
         }
     </style>
 </head>
-<body>
+<body tabindex="0"> <!-- Tabindex forces document body to hold active focus properties inside webview boxes -->
+
+    <!-- Core Game Status HUD Tracker Strip -->
     <div id="header-hud">
         <div>Credits: <span id="stat-credits">4000</span></div>
         <div>Bet: <span id="stat-bet">25</span> (<span id="per-hand-bet">5</span>/Hand)</div>
         <div>Won: <span id="stat-won">0</span></div>
     </div>
+
+    <!-- Main Visual Matrix Sandbox Grid -->
     <div id="main-board">
+        
+        <!-- Payout Multi-Hand Evaluation Panel Grid -->
         <div id="payout-registry-panel">
             <div class="registry-row" id="pay-rf"><span>Royal Flush</span><span>4000</span></div>
             <div class="registry-row" id="pay-sf"><span>Straight Flush</span><span>250</span></div>
@@ -196,11 +225,15 @@
             <div class="registry-row" id="pay-2p"><span>Two Pair</span><span>10</span></div>
             <div class="registry-row" id="pay-job"><span>Jacks or Better</span><span>5</span></div>
         </div>
+
+        <!-- Upper 4 Background Simulated Card Processing Lanes -->
         <div id="game-lanes-container">
             <div class="poker-hand-lane" id="lane-4"></div>
             <div class="poker-hand-lane" id="lane-3"></div>
             <div class="poker-hand-lane" id="lane-2"></div>
             <div class="poker-hand-lane" id="lane-1"></div>
+
+            <!-- Primary Navigation Input Control Loop Target (Main Player Interactive Hand) -->
             <div class="poker-hand-lane main-player-hand">
                 <button class="poker-card-button" data-idx="0" id="card-0"><span class="hold-tab-indicator">HELD</span><span class="card-face">--</span></button>
                 <button class="poker-card-button" data-idx="1" id="card-1"><span class="hold-tab-indicator">HELD</span><span class="card-face">--</span></button>
@@ -210,94 +243,157 @@
             </div>
         </div>
     </div>
+
+    <!-- Interface Navigation Anchor Chrome Shelf Buttons -->
     <div id="bottom-control-shelf">
         <button class="chrome-control-btn" id="btn-payouts">PAYOUTS</button>
         <button class="chrome-control-btn" id="btn-bet">BET: 5</button>
         <button class="chrome-control-btn" id="btn-deal">DEAL</button>
     </div>
+
+    <!-- Center Screen Total Tally Pop-up Screen Layout -->
     <div id="tally-popup-shield">
         <h2 style="color: #ffd700; font-size: 24px; margin-bottom: 10px;">HAND COMPLETE</h2>
         <div style="font-size: 18px; margin-bottom: 10px;" id="popup-winning-text">Total Payouts Evaluated</div>
         <div style="font-size: 32px; font-weight: bold; color: #00ff00;" id="popup-credits-won">+0</div>
     </div>
+
+    <!-- Internal Paytable Multi-Column Rules Grid Overlay -->
     <div id="paytable-modal-layer">
         <h2 style="color: #ffd700; text-align: center; margin-bottom: 15px;">JACKS OR BETTER PAYTABLE</h2>
         <div style="flex: 1; font-size: 14px; line-height: 2;" id="paytable-matrix-listing"></div>
         <button class="chrome-control-btn" id="btn-close-paytable" style="height: 50px; margin-top: 10px;">CLOSE</button>
     </div>
+
+    <!-- Embedded Synthetic Web Audio Tone Generator Graph Architecture -->
     <script>
         const AudioEngine = {
             ctx: null,
-            init() { if (!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)(); },
+            init() {
+                if (!this.ctx) {
+                    this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+            },
             playFlip() {
-                this.init(); let osc = this.ctx.createOscillator(), gain = this.ctx.createGain();
-                osc.type = 'triangle'; osc.frequency.setValueAtTime(180, this.ctx.currentTime);
+                this.init();
+                let osc = this.ctx.createOscillator();
+                let gain = this.ctx.createGain();
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(180, this.ctx.currentTime);
                 osc.frequency.exponentialRampToValueAtTime(80, this.ctx.currentTime + 0.08);
-                gain.gain.setValueAtTime(0.15, this.ctx.currentTime); gain.gain.linearRampToValueAtTime(0.01, this.ctx.currentTime + 0.08);
-                osc.connect(gain); gain.connect(this.ctx.destination); osc.start(); osc.stop(this.ctx.currentTime + 0.08);
+                gain.gain.setValueAtTime(0.15, this.ctx.currentTime);
+                gain.gain.linearRampToValueAtTime(0.01, this.ctx.currentTime + 0.08);
+                osc.connect(gain); gain.connect(this.ctx.destination);
+                osc.start(); osc.stop(this.ctx.currentTime + 0.08);
             },
             playBell() {
-                this.init(); let osc = this.ctx.createOscillator(), gain = this.ctx.createGain();
-                osc.type = 'sine'; osc.frequency.setValueAtTime(987.77, this.ctx.currentTime);
-                gain.gain.setValueAtTime(0.2, this.ctx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.3);
-                osc.connect(gain); gain.connect(this.ctx.destination); osc.start(); osc.stop(this.ctx.currentTime + 0.3);
+                this.init();
+                let osc = this.ctx.createOscillator();
+                let gain = this.ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(987.77, this.ctx.currentTime); 
+                gain.gain.setValueAtTime(0.2, this.ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.3);
+                osc.connect(gain); gain.connect(this.ctx.destination);
+                osc.start(); osc.stop(this.ctx.currentTime + 0.3);
             },
             playTick() {
-                this.init(); let osc = this.ctx.createOscillator(), gain = this.ctx.createGain();
-                osc.type = 'sine'; osc.frequency.setValueAtTime(587.33, this.ctx.currentTime);
-                gain.gain.setValueAtTime(0.1, this.ctx.currentTime); gain.gain.linearRampToValueAtTime(0.01, this.ctx.currentTime + 0.05);
-                osc.connect(gain); gain.connect(this.ctx.destination); osc.start(); osc.stop(this.ctx.currentTime + 0.05);
+                this.init();
+                let osc = this.ctx.createOscillator();
+                let gain = this.ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(587.33, this.ctx.currentTime); 
+                gain.gain.setValueAtTime(0.1, this.ctx.currentTime);
+                gain.gain.linearRampToValueAtTime(0.01, this.ctx.currentTime + 0.05);
+                osc.connect(gain); gain.connect(this.ctx.destination);
+                osc.start(); osc.stop(this.ctx.currentTime + 0.05);
             }
         };
+
+        // --- GAME STATE DICTIONARIES ---
         const SUITS = ['♠', '♥', '♦', '♣'];
         const RANKS = ['2','3','4','5','6','7','8','9','10','J','Q','K','A'];
         const VALUES = { '2':2, '3':3, '4':4, '5':5, '6':6, '7':7, '8':8, '9':9, '10':10, 'J':11, 'Q':12, 'K':13, 'A':14 };
-        let credits = 4000, betChoices = [1, 5, 10, 100], currentBetIndex = 1, gameState = 'DEAL';
-        let deck = [], playerHand = [], heldIndices = new Set(), audioCounterInterval = null;
+
+        let credits = 4000;
+        let betChoices = [1, 5, 10, 100];
+        let currentBetIndex = 1; 
+        let gameState = 'DEAL'; 
+
+        let deck = [];
+        let playerHand = [];
+        let heldIndices = new Set();
+        let audioCounterInterval = null;
+
         const cardButtons = Array.from(document.querySelectorAll('.poker-card-button'));
         const bottomButtons = [
             document.getElementById('btn-payouts'),
             document.getElementById('btn-bet'),
             document.getElementById('btn-deal')
         ];
+        
         const interactiveFocusMatrix = [...cardButtons, ...bottomButtons];
-        let activeFocusIndex = 7;
-        const displayCredits = document.getElementById('stat-credits');
-        const displayBet = document.getElementById('stat-bet');
-        const displayWon = document.getElementById('stat-won');
-        const displayPerHandBet = document.getElementById('per-hand-bet');
-        const btnBetElement = document.getElementById('btn-bet');
-        const btnDealElement = document.getElementById('btn-deal');
-        const popupTallyShield = document.getElementById('tally-popup-shield');
-        const paytableModalLayer = document.getElementById('paytable-modal-layer');
+        let activeFocusIndex = 7; // Highlight the main DEAL button first
 
-        function updateVisualSelectionStyles() {
-            interactiveFocusMatrix.forEach((el, idx) => {
-                if (idx === activeFocusIndex) el.classList.add('active-cursor');
-                else el.classList.remove('active-cursor');
+        // Programmatically draw the cursor highlight class
+        function refreshCursorHighlights() {
+            interactiveFocusMatrix.forEach((el, index) => {
+                if (index === activeFocusIndex) {
+                    el.classList.add('active-cursor');
+                } else {
+                    el.classList.remove('active-cursor');
+                }
             });
         }
 
-        window.addEventListener('keydown', function(e) {
-            if(['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Enter', 'Escape'].includes(e.key)) e.preventDefault();
-            if (e.key === 'Escape') { handleMainDealButtonPipeline(); return; }
-            if (e.key === 'Enter') { triggerActionOnCurrentSelection(); return; }
+        // CRITICAL SECURE INIT FOR HERALD RUNTIME SANDBOX: 
+        // Forces active focus tracking directly onto the root document elements immediately on launch.
+        document.addEventListener('DOMContentLoaded', () => {
+            document.body.focus();
+            refreshCursorHighlights();
+        });
+
+        // --- HARDWARE DPAD/ARMBAND INTEGRATION CONTROL TRANSIT LOOP ---
+        // CRITICAL HERALD WEBVIEW FIX: Listen to document.body explicitly to stop events from being dropped.
+        document.body.addEventListener('keydown', function(e) {
+            if(['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Enter', 'Escape'].includes(e.key)) {
+                e.preventDefault();
+            }
+
+            // Middle finger pinch macro handler (Escape shortcut)
+            if (e.key === 'Escape') {
+                handleMainDealButtonPipeline();
+                return;
+            }
+
             if (e.key === 'ArrowLeft') {
                 if (activeFocusIndex > 0 && activeFocusIndex <= 4) activeFocusIndex--;
                 else if (activeFocusIndex > 5 && activeFocusIndex <= 7) activeFocusIndex--;
-            } else if (e.key === 'ArrowRight') {
+            }
+            else if (e.key === 'ArrowRight') {
                 if (activeFocusIndex >= 0 && activeFocusIndex < 4) activeFocusIndex++;
                 else if (activeFocusIndex >= 5 && activeFocusIndex < 7) activeFocusIndex++;
-            } else if (e.key === 'ArrowUp') {
-                if (activeFocusIndex >= 5 && activeFocusIndex <= 7) activeFocusIndex = activeFocusIndex - 5;
-            } else if (e.key === 'ArrowDown') {
-                if (activeFocusIndex >= 0 && activeFocusIndex <= 4) activeFocusIndex = Math.min(7, 5 + Math.floor(activeFocusIndex / 2));
             }
-            updateVisualSelectionStyles();
+            else if (e.key === 'ArrowUp') {
+                if (activeFocusIndex >= 5 && activeFocusIndex <= 7) {
+                    activeFocusIndex = activeFocusIndex - 5; 
+                }
+            }
+            else if (e.key === 'ArrowDown') {
+                if (activeFocusIndex >= 0 && activeFocusIndex <= 4) {
+                    activeFocusIndex = Math.min(7, 5 + Math.floor(activeFocusIndex / 2)); 
+                }
+            }
+            // Index Finger Pinch execution logic handler
+            else if (e.key === 'Enter') {
+                triggerActionOnActiveIndex();
+            }
+
+            refreshCursorHighlights();
         });
 
-        function triggerActionOnCurrentSelection() {
-            if (activeFocusIndex >= 0 && activeFocusIndex <= 4) {
+        function triggerActionOnActiveIndex() {
+            if (activeFocusIndex <= 4) {
                 if (gameState === 'DRAW') toggleCardHoldState(activeFocusIndex);
             } else if (activeFocusIndex === 5) {
                 togglePaytableModalView();
@@ -308,96 +404,157 @@
             }
         }
 
+        // Standard touch/click backups to keep desktop testing fully operational
         cardButtons.forEach((btn, index) => {
-            btn.addEventListener('click', () => { if (gameState === 'DRAW') toggleCardHoldState(index); });
+            btn.addEventListener('click', () => {
+                if (gameState === 'DRAW') {
+                    activeFocusIndex = index;
+                    toggleCardHoldState(index);
+                    refreshCursorHighlights();
+                }
+            });
         });
-        document.getElementById('btn-payouts').addEventListener('click', togglePaytableModalView);
-        document.getElementById('btn-bet').addEventListener('click', cycleBetConfigurations);
-        document.getElementById('btn-deal').addEventListener('click', handleMainDealButtonPipeline);
+        bottomButtons[0].addEventListener('click', togglePaytableModalView);
+        bottomButtons[1].addEventListener('click', cycleBetConfigurations);
+        bottomButtons[2].addEventListener('click', handleMainDealButtonPipeline);
         document.getElementById('btn-close-paytable').addEventListener('click', togglePaytableModalView);
 
+        // --- STRUCTURAL POKER GAME LOGIC ENGINES ---
         function toggleCardHoldState(index) {
-            if (heldIndices.has(index)) { heldIndices.delete(index); cardButtons[index].classList.remove('card-is-held'); }
-            else { heldIndices.add(index); cardButtons[index].classList.add('card-is-held'); }
+            if (heldIndices.has(index)) {
+                heldIndices.delete(index);
+                cardButtons[index].classList.remove('card-is-held');
+            } else {
+                heldIndices.add(index);
+                cardButtons[index].classList.add('card-is-held');
+            }
             renderBackgroundLanesPreview();
         }
+
         function cycleBetConfigurations() {
             if (gameState !== 'DEAL') return;
             currentBetIndex = (currentBetIndex + 1) % betChoices.length;
             let perHandBet = betChoices[currentBetIndex];
-            btnBetElement.textContent = `BET: ${perHandBet}`;
+            bottomButtons[1].textContent = `BET: ${perHandBet}`;
             displayBet.textContent = perHandBet * 5;
             displayPerHandBet.textContent = perHandBet;
             buildPaytableMatrixDisplay();
         }
+
         function togglePaytableModalView() {
-            if (paytableModalLayer.style.display === 'flex') paytableModalLayer.style.display = 'none';
-            else { buildPaytableMatrixDisplay(); paytableModalLayer.style.display = 'flex'; }
+            if (paytableModalLayer.style.display === 'flex') {
+                paytableModalLayer.style.display = 'none';
+                document.body.focus();
+            } else {
+                buildPaytableMatrixDisplay();
+                paytableModalLayer.style.display = 'flex';
+            }
         }
+
         function buildPaytableMatrixDisplay() {
             const list = document.getElementById('paytable-matrix-listing');
-            let m = betChoices[currentBetIndex];
+            let multiplier = betChoices[currentBetIndex];
             list.innerHTML = `
-                <div class="registry-row"><span>Royal Flush</span><span>${m * 800}</span></div>
-                <div class="registry-row"><span>Straight Flush</span><span>${m * 50}</span></div>
-                <div class="registry-row"><span>4 of a Kind</span><span>${m * 25}</span></div>
-                <div class="registry-row"><span>Full House</span><span>${m * 9}</span></div>
-                <div class="registry-row"><span>Flush</span><span>${m * 6}</span></div>
-                <div class="registry-row"><span>Straight</span><span>${m * 4}</span></div>
-                <div class="registry-row"><span>3 of a Kind</span><span>${m * 3}</span></div>
-                <div class="registry-row"><span>Two Pair</span><span>${m * 2}</span></div>
-                <div class="registry-row"><span>Jacks or Better</span><span>${m * 1}</span></div>
+                <div class="registry-row"><span>Royal Flush</span><span>${multiplier * 800}</span></div>
+                <div class="registry-row"><span>Straight Flush</span><span>${multiplier * 50}</span></div>
+                <div class="registry-row"><span>4 of a Kind</span><span>${multiplier * 25}</span></div>
+                <div class="registry-row"><span>Full House</span><span>${multiplier * 9}</span></div>
+                <div class="registry-row"><span>Flush</span><span>${multiplier * 6}</span></div>
+                <div class="registry-row"><span>Straight</span><span>${multiplier * 4}</span></div>
+                <div class="registry-row"><span>3 of a Kind</span><span>${multiplier * 3}</span></div>
+                <div class="registry-row"><span>Two Pair</span><span>${multiplier * 2}</span></div>
+                <div class="registry-row"><span>Jacks or Better</span><span>${multiplier * 1}</span></div>
             `;
         }
+
         function handleMainDealButtonPipeline() {
-            if (gameState === 'DEAL') startNewHandSequence();
-            else if (gameState === 'DRAW') executeDrawPhaseCalculations();
-            else if (gameState === 'TALLY') { clearAudioCountupSequence(); startNewHandSequence(); }
+            if (gameState === 'DEAL') {
+                startNewHandSequence();
+            } else if (gameState === 'DRAW') {
+                executeDrawPhaseCalculations();
+            } else if (gameState === 'TALLY') {
+                clearAudioCountupSequence();
+                startNewHandSequence();
+            }
         }
+
         function buildFreshShuffledDeck() {
             deck = [];
-            for (let s of SUITS) { for (let r of RANKS) { deck.push({ rank: r, suit: s }); } }
+            for (let s of SUITS) {
+                for (let r of RANKS) {
+                    deck.push({ rank: r, suit: s });
+                }
+            }
             for (let i = deck.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
                 [deck[i], deck[j]] = [deck[j], deck[i]];
             }
         }
+
         function startNewHandSequence() {
-            let totalCost = betChoices[currentBetIndex] * 5;
-            if (credits < totalCost) { alert("Insufficient Credits!"); return; }
-            credits -= totalCost; displayCredits.textContent = credits; displayWon.textContent = "0";
+            let totalHandCost = betChoices[currentBetIndex] * 5;
+            if (credits < totalHandCost) {
+                alert("Insufficient Game Credits!");
+                return;
+            }
+
+            credits -= totalHandCost;
+            displayCredits.textContent = credits;
+            displayWon.textContent = "0";
             popupTallyShield.style.display = 'none';
             document.querySelectorAll('.registry-row').forEach(r => r.classList.remove('active-payout'));
-            buildFreshShuffledDeck(); heldIndices.clear();
+
+            buildFreshShuffledDeck();
+            heldIndices.clear();
             cardButtons.forEach(btn => btn.classList.remove('card-is-held'));
-            gameState = 'DRAW'; btnDealElement.textContent = "DRAW";
-            playerHand = []; for(let i=0; i<5; i++) playerHand.push(deck.pop());
+
+            gameState = 'DRAW';
+            bottomButtons[2].textContent = "DRAW";
+
+            playerHand = [];
+            for(let i=0; i<5; i++) {
+                playerHand.push(deck.pop());
+            }
+
             for(let i=0; i<5; i++) {
                 setTimeout(() => {
                     AudioEngine.playFlip();
                     let faceSpan = cardButtons[i].querySelector('.card-face');
                     faceSpan.textContent = playerHand[i].rank + playerHand[i].suit;
                     cardButtons[i].className = `poker-card-button ${(playerHand[i].suit==='♥'||playerHand[i].suit==='♦') ? 'red-card' : ''}`;
-                    updateVisualSelectionStyles();
                 }, i * 100);
             }
-            setTimeout(() => { renderBackgroundLanesPreview(); activeFocusIndex = 0; updateVisualSelectionStyles(); }, 550);
+
+            setTimeout(() => {
+                renderBackgroundLanesPreview();
+                activeFocusIndex = 0; // Move target focus indicator over card 1 automatically
+                refreshCursorHighlights();
+            }, 550);
         }
+
         function renderBackgroundLanesPreview() {
             for(let h=0; h<4; h++) {
-                let container = document.getElementById(`lane-${h+1}`); container.innerHTML = '';
+                let container = document.getElementById(`lane-${h+1}`);
+                container.innerHTML = '';
                 for(let i=0; i<5; i++) {
                     let microCard = document.createElement('div');
                     if (heldIndices.has(i)) {
                         microCard.className = `micro-card-node micro-held ${(playerHand[i].suit==='♥'||playerHand[i].suit==='♦') ? 'red-card' : ''}`;
                         microCard.textContent = playerHand[i].rank + playerHand[i].suit;
-                    } else { microCard.className = 'micro-card-node'; microCard.textContent = '--'; microCard.style.backgroundColor = '#111155'; }
+                    } else {
+                        microCard.className = 'micro-card-node';
+                        microCard.textContent = '--';
+                        microCard.style.backgroundColor = '#111155';
+                    }
                     container.appendChild(microCard);
                 }
             }
         }
+
         function executeDrawPhaseCalculations() {
-            gameState = 'TALLY'; btnDealElement.textContent = "DEAL";
+            gameState = 'TALLY';
+            bottomButtons[2].textContent = "DEAL";
+
             for(let i=0; i<5; i++) {
                 if (!heldIndices.has(i)) {
                     playerHand[i] = deck.pop();
@@ -406,71 +563,145 @@
                     cardButtons[i].className = `poker-card-button ${(playerHand[i].suit==='♥'||playerHand[i].suit==='♦') ? 'red-card' : ''}`;
                 }
             }
-            let totalWin = 0, winList = [];
-            let mainRes = evaluatePokerHandRank(playerHand);
-            if (mainRes.payout > 0) {
-                let winTally = mainRes.payout * betChoices[currentBetIndex]; totalWin += winTally;
-                winList.push(`Main: ${mainRes.name}`); highlightLeftPayoutTrackRow(mainRes.id);
+
+            let totalCreditsWonThisRound = 0;
+            let winTypesDetected = [];
+
+            let primaryResult = evaluatePokerHandRank(playerHand);
+            if (primaryResult.payout > 0) {
+                let winTally = primaryResult.payout * betChoices[currentBetIndex];
+                totalCreditsWonThisRound += winTally;
+                winTypesDetected.push(`Main: ${primaryResult.name}`);
+                highlightLeftPayoutTrackRow(primaryResult.id);
             }
+
             for(let h=0; h<4; h++) {
-                let instance = [];
-                for(let i=0; i<5; i++) { if (heldIndices.has(i)) instance.push(playerHand[i]); else instance.push(deck.pop()); }
-                renderBackgroundLaneExecutionDraw(h+1, instance);
-                let evalRes = evaluatePokerHandRank(instance);
-                if (evalRes.payout > 0) {
-                    let winTally = evalRes.payout * betChoices[currentBetIndex]; totalWin += winTally;
-                    winList.push(`H${h+1}: ${evalRes.name}`); highlightLeftPayoutTrackRow(evalRes.id);
+                let currentHandInstance = [];
+                for(let i=0; i<5; i++) {
+                    if (heldIndices.has(i)) {
+                        currentHandInstance.push(playerHand[i]);
+                    } else {
+                        currentHandInstance.push(deck.pop());
+                    }
+                }
+                
+                renderBackgroundLaneExecutionDraw(h+1, currentHandInstance);
+
+                let evalResult = evaluatePokerHandRank(currentHandInstance);
+                if (evalResult.payout > 0) {
+                    let winTally = evalResult.payout * betChoices[currentBetIndex];
+                    totalCreditsWonThisRound += winTally;
+                    winTypesDetected.push(`Hand ${h+1}: ${evalResult.name}`);
+                    highlightLeftPayoutTrackRow(evalResult.id);
                 }
             }
-            setTimeout(() => { triggerTallyPopupCountupSequence(totalWin, winList); }, 600);
+
+            setTimeout(() => {
+                triggerTallyPopupCountupSequence(totalCreditsWonThisRound, winTypesDetected);
+            }, 600);
         }
-        function renderBackgroundLaneExecutionDraw(laneId, finalHand) {
-            let container = document.getElementById(`lane-${laneId}`); container.innerHTML = ''; AudioEngine.playFlip();
+
+        function renderBackgroundLaneExecutionDraw(laneId, finalizedHandArray) {
+            let container = document.getElementById(`lane-${laneId}`);
+            container.innerHTML = '';
+            AudioEngine.playFlip();
+            
             for(let i=0; i<5; i++) {
-                let microCard = document.createElement('div');
-                microCard.className = `micro-card-node ${(finalHand[i].suit==='♥'||finalHand[i].suit==='♦') ? 'red-card' : ''}`;
-                if (heldIndices.has(i)) microCard.classList.add('micro-held');
-                microCard.textContent = finalHand[i].rank + finalHand[i].suit; container.appendChild(microCard);
+                let documentMicroNode = document.createElement('div');
+                documentMicroNode.className = `micro-card-node ${(finalizedHandArray[i].suit==='♥'||finalizedHandArray[i].suit==='♦') ? 'red-card' : ''}`;
+                if (heldIndices.has(i)) documentMicroNode.classList.add('micro-held');
+                documentMicroNode.textContent = finalizedHandArray[i].rank + finalizedHandArray[i].suit;
+                container.appendChild(documentMicroNode);
             }
         }
+
         function highlightLeftPayoutTrackRow(id) {
-            let el = document.getElementById(`pay-${id}`); if (el) el.classList.add('active-payout');
-        }
-        function triggerTallyPopupCountupSequence(totalWin, winList) {
-            let pText = document.getElementById('popup-winning-text'); let pCoins = document.getElementById('popup-credits-won');
-            pText.textContent = winList.length > 0 ? winList.slice(0,2).join(" | ") : "No Winning Hands";
-            popupTallyShield.style.display = 'flex'; activeFocusIndex = 7; updateVisualSelectionStyles();
-            if (totalWin > 0) {
-                AudioEngine.playBell(); let currentTick = 0;
-                audioCounterInterval = setInterval(() => {
-                    if (currentTick < totalWin) { currentTick++; credits++; displayCredits.textContent = credits; displayWon.textContent = currentTick; pCoins.textContent = `+${currentTick}`; AudioEngine.playTick(); }
-                    else { clearAudioCountupSequence(); }
-                }, 40);
-            } else { pCoins.textContent = "0"; gameState = 'DEAL'; }
-        }
-        function clearAudioCountupSequence() { if (audioCounterInterval) { clearInterval(audioCounterInterval); audioCounterInterval = null; } gameState = 'DEAL'; }
-        function evaluatePokerHandRank(hand) {
-            let rList = hand.map(c => c.rank), sList = hand.map(c => c.suit);
-            let isFlush = sList.every(s => s === sList[0]);
-            let nVals = rList.map(r => VALUES[r]).sort((a,b) => a - b);
-            let isStraight = false;
-            if (new Set(nVals).size === 5) {
-                if (nVals[4] - nVals[0] === 4) isStraight = true;
-                if (nVals[4] === 14 && nVals[0] === 2 && nVals[1] === 3 && nVals[2] === 4 && nVals[3] === 5) isStraight = true;
+            let element = document.getElementById(`pay-${id}`);
+            if (element) {
+                element.classList.add('active-payout');
             }
-            let dMap = {}; rList.forEach(r => dMap[r] = (dMap[r] || 0) + 1);
-            let counts = Object.values(dMap).sort((a,b) => b - a);
-            if (isStraight && isFlush) { if (nVals.includes(14) && nVals.includes(13) && nVals.includes(10)) return { id: 'rf', name: 'Royal Flush', payout: 800 }; return { id: 'sf', name: 'Straight Flush', payout: 50 }; }
+        }
+
+        function triggerTallyPopupCountupSequence(totalWin, winList) {
+            let popupText = document.getElementById('popup-winning-text');
+            let popupCoins = document.getElementById('popup-credits-won');
+            
+            popupText.textContent = winList.length > 0 ? winList.slice(0,2).join(" | ") : "No Winning Hands";
+            popupTallyShield.style.display = 'flex';
+
+            activeFocusIndex = 7; // Focus drops clean back over the DEAL button
+            refreshCursorHighlights();
+
+            if (totalWin > 0) {
+                AudioEngine.playBell();
+                let currentTickValue = 0;
+                
+                audioCounterInterval = setInterval(() => {
+                    if (currentTickValue < totalWin) {
+                        currentTickValue++;
+                        credits++;
+                        displayCredits.textContent = credits;
+                        displayWon.textContent = currentTickValue;
+                        popupCoins.textContent = `+${currentTickValue}`;
+                        AudioEngine.playTick();
+                    } else {
+                        clearAudioCountupSequence();
+                    }
+                }, 40);
+            } else {
+                popupCoins.textContent = "0";
+                gameState = 'DEAL';
+            }
+        }
+
+        function clearAudioCountupSequence() {
+            if (audioCounterInterval) {
+                clearInterval(audioCounterInterval);
+                audioCounterInterval = null;
+            }
+            gameState = 'DEAL';
+        }
+
+        // --- CANONICAL JACKS OR BETTER SCORING ENGINE MATRIX ---
+        function evaluatePokerHandRank(hand) {
+            let ranksList = hand.map(c => c.rank);
+            let suitsList = hand.map(c => c.suit);
+            let isFlush = suitsList.every(s => s === suitsList[0]);
+            let numericalValues = ranksList.map(r => VALUES[r]).sort((a,b) => a - b);
+            let isStraight = false;
+            
+            if (new Set(numericalValues).size === 5) {
+                if (numericalValues[4] - numericalValues[0] === 4) isStraight = true;
+                if (numericalValues[4] === 14 && numericalValues[0] === 2 && numericalValues[1] === 3 && numericalValues[2] === 4 && numericalValues[3] === 5) {
+                    isStraight = true;
+                }
+            }
+
+            let distributionMap = {};
+            ranksList.forEach(r => distributionMap[r] = (distributionMap[r] || 0) + 1);
+            let counts = Object.values(distributionMap).sort((a,b) => b - a);
+
+            if (isStraight && isFlush) {
+                if (numericalValues.includes(14) && numericalValues.includes(13) && numericalValues.includes(10)) {
+                    return { id: 'rf', name: 'Royal Flush', payout: 800 };
+                }
+                return { id: 'sf', name: 'Straight Flush', payout: 50 };
+            }
             if (counts[0] === 4) return { id: '4k', name: '4 of a Kind', payout: 25 };
             if (counts[0] === 3 && counts[1] === 2) return { id: 'fh', name: 'Full House', payout: 9 };
             if (isFlush) return { id: 'fl', name: 'Flush', payout: 6 };
             if (isStraight) return { id: 'st', name: 'Straight', payout: 4 };
             if (counts[0] === 3) return { id: '3k', name: '3 of a Kind', payout: 3 };
             if (counts[0] === 2 && counts[1] === 2) return { id: '2p', name: 'Two Pair', payout: 2 };
-            if (counts[0] === 2) { let pRank = Object.keys(dMap).find(k => dMap[k] === 2); if (VALUES[pRank] >= 11) return { id: 'job', name: 'Jacks or Better', payout: 1 }; }
+            
+            if (counts[0] === 2) {
+                let pairRank = Object.keys(distributionMap).find(k => distributionMap[k] === 2);
+                if (VALUES[pairRank] >= 11) {
+                    return { id: 'job', name: 'Jacks or Better', payout: 1 };
+                }
+            }
             return { id: 'none', name: 'High Card', payout: 0 };
         }
-        updateVisualSelectionStyles();
     </script>
 </body>
 </html>
