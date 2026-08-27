@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meta Glasses 5-Hand Video Poker</title>
+    <style>
+        :root {
+            --bg-color: #0b2512;
+            --felt-color: #144020;
+            --gold: #ffd700;
+            --card-white: #ffffff;
+            --card-red: #ff3333;
+            --text-white: #ffffff;
+        }
+
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            background-image: radial-gradient(circle, var(--felt-color) 0%, var(--bg-color) 100%);
+            color: var(--text-white);
+            font-family: 'Segoe UI', Arial, sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 15px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            height: 100vh;
+        }
+
+        /* Top HUD Section */
+        #hud-container {
+            width: 100%;
+            max-width: 600px;
+            display: flex;
+            justify-content: space-between;
+            background: rgba(0, 0, 0, 0.4);
+            padding: 10px 20px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            margin-top: 10px;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
+        }
+
+        .hud-item {
+            font-size: 16px;
+            font-weight: bold;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .hud-value {
+            color: var(--gold);
+        }
+
+        /* Paytable Notification Area */
+        #status-display {
+            font-size: 18px;
+            font-weight: bold;
+            color: var(--gold);
+            min-height: 24px;
+            margin: 10px 0;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        }
+
+        /* Main Hands Layout Area */
+        #hands-container {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            width: 100%;
+            max-width: 500px;
+            flex-grow: 1;
+            justify-content: center;
+        }
+
+        .poker-hand {
+            display: flex;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        /* Card Button Framework - Custom focus tracking for Meta Glass Swipes */
+        .card-btn {
+            background: var(--card-white);
+            color: #000000;
+            border: 3px solid transparent;
+            border-radius: 6px;
+            width: 17%;
+            aspect-ratio: 2.5 / 3.5;
+            max-width: 75px;
+            min-height: 75px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            outline: none;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 6px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.4);
+            transition: transform 0.1s, border-color 0.1s, box-shadow 0.1s;
+        }
+
+        /* Visual indicator for Meta Neural Band swipe focus */
+        .card-btn:focus, .card-btn:hover {
+            border-color: var(--gold);
+            transform: scale(1.06);
+            box-shadow: 0 0 15px var(--gold);
+            z-index: 10;
+        }
+
+        /* Custom treatment for the single baseline interactive decision layer */
+        .main-hand .card-btn {
+            cursor: pointer;
+        }
+        
+        .sub-hand .card-btn {
+            cursor: not-allowed;
+            opacity: 0.9;
+        }
+
+        .card-btn.held {
+            background: #e6f2ff;
+            border-color: #2196f3 !important;
+            box-shadow: 0 0 10px rgba(33, 150, 243, 0.5);
+        }
+
+        .suit-top { text-align: left; font-size: 14px; }
+        .suit-center { font-size: 24px; text-align: center; line-height: 1; }
+        .suit-bottom { text-align: right; font-size: 14px; transform: rotate(180deg); }
+
+        .red-suit {
+            color: var(--card-red);
+        }
+
+        /* Hold Indicators Overlay Layer */
+        .hold-tab {
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #2196f3;
+            color: white;
+            font-size: 9px;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: bold;
+            letter-spacing: 0.5px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            display: none;
+        }
+
+        .card-btn.held .hold-tab {
+            display: block;
+        }
+
+        /* Action Buttons Area */
+        #controls-container {
+            width: 100%;
+            max-width: 600px;
+            display: flex;
+            justify-content: center;
+            margin-bottom: 10px;
+        }
+
+        #action-btn {
+            background: linear-gradient(185deg, #ffe042 0%, var(--gold) 100%);
+            color: #000000;
+            border: 3px solid transparent;
+            padding: 14px 45px;
+            font-size: 20px;
+            font-weight: bold;
+            border-radius: 30px;
+            cursor: pointer;
+            outline: none;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 6px 12px rgba(0,0,0,0.4);
+            transition: transform 0.1s, border-color 0.1s;
+        }
+
+        #action-btn:focus, #action-btn:hover {
+            border-color: var(--text-white);
+            box-shadow: 0 0 20px var(--gold);
+            transform: scale(1.05);
+        }
+
+        /* Startup Focus Trapping Overlay Block */
+        #focus-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(11, 37, 18, 0.95);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            cursor: pointer;
+            padding: 20px;
+        }
+
+        .modal-box {
+            background: rgba(0, 0, 0, 0.6);
+            padding: 30px;
+            border-radius: 15px;
+            border: 2px solid var(--gold);
+            text-align: center;
+            max-width: 400px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+        }
+
+        .modal-box h2 {
+            color: var(--gold);
+            margin-top: 0;
+        }
+
+        .modal-box p {
+            font-size: 14px;
+            line-height: 1.5;
+            color: #cccccc;
+            margin-bottom: 20px;
+        }
+
+        .start-btn {
+            background: var(--gold);
+            color: black;
+            border: none;
+            padding: 10px 25px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Overlay ensuring browser window activation before listening to wristband keys -->
+    <div id="focus-overlay" onclick="launchGameEngine()">
+        <div class="modal-box">
+            <h2>5-Hand Video Poker</h2>
+            <p><strong>Glasses Controls:</strong> Swipe your wristband left/right to browse cards. Pinch index finger to lock holds or trigger deal.</p>
+            <button class="start-btn">ENABLE SMART CONTROLS</button>
+        </div>
+    </div>
+
+    <!-- Top Stats Display Grid -->
+    <div id="hud-container">
+        <div class="hud-item">CREDITS: <span id="stat-credits" class="hud-value">4000</span></div>
+        <div class="hud-item">BET: <span id="stat-bet" class="hud-value">25</span></div>
+        <div class="hud-item">WON: <span id="stat-won" class="hud-value">0</span></div>
+    </div>
+
+    <div id="status-display">JACKS OR BETTER MULTI-HAND</div>
+
+    <!-- Game Visual Engine Canvas Wrapper Alternative -->
+    <div id="hands-container">
+        <!-- Sub Hands 1-4 (Replicated evaluation spaces layout) -->
+        <div class="poker-hand sub-hand" id="hand-1"></div>
+        <div class="poker-hand sub-hand" id="hand-2"></div>
+        <div class="poker-hand sub-hand" id="hand-3"></div>
+        <div class="poker-hand sub-hand" id="hand-4"></div>
+        <!-- Baseline Control Input Primary Hand Layer -->
+        <div class="poker-hand main-hand" id="hand-0"></div>
+    </div>
+
+    <!-- Active Structural Interactive Trigger Grid Area -->
+    <div id="controls-container">
+        <button id="action-btn">DEAL</button>
+    </div>
+
+    <script>
+        // --- 1. CARD MATRIX ENGINE SETUP ---
+        const SUITS = [
+            { symbol: '♠', name: 'spades', isRed: false },
+            { symbol: '♥', name: 'hearts', isRed: true },
+            { symbol: '♦', name: 'diamonds', isRed: true },
+            { symbol: '♣', name: 'clubs', isRed: false }
+        ];
+        const VALUES = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
+        const VALUES_RANK = { '2':2, '3':3, '4':4, '5':5, '6':6, '7':7, '8':8, '9':9, '10':10, 'J':11, 'Q':12, 'K':13, 'A':14 };
+
+        let deck = [];
+        let credits = 4000;
+        let isDrawState = false;
+        
+        // Multi-hand structures tracking 5 parallel lists
+        let playerHands = [[], [], [], [], []];
+        let cardHeldStates = [false, false, false, false, false];
+
+        // Focus ring linear target sequencing maps
+        let interactableElements = [];
+        let activeFocusIndex = 0;
+
+        const actionButton = document.getElementById('action-btn');
+        const overlay = document.getElementById('focus-overlay');
+
+        // --- 2. GAMESTATE ENGINE LOGIC ---
+        function createDeck() {
+            deck = [];
+            for (let suit of SUITS) {
+                for (let val of VALUES) {
+                    deck.push({ value: val, suit: suit });
+                }
+            }
+        }
+
+        function shuffleDeck() {
+            for (let i = deck.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [deck[i], deck[j]] = [deck[j], deck[i]];
+            }
+        }
+
+        function dealCard() {
+            return deck.pop();
+        }
+
+        // Generate base markup structures directly map focus vectors natively
+        function initializeHandLayouts() {
+            for (let h = 0; h < 5; h++) {
+                const handRow = document.getElementById(`hand-${h}`);
+                handRow.innerHTML = '';
+                for (let c = 0; c < 5; c++) {
+                    const btn = document.createElement('button');
+                    btn.className = 'card-btn';
+                    // Base hand holds can be toggled by user input vectors
+                    if (h === 0) {
+                        btn.setAttribute('data-card-idx', c);
+                    } else {
+                        btn.disabled = true; // Sub-hands evaluate non-interactively
+                    }
+                    handRow.appendChild(btn);
+                }
+            }
+        }
+
+        function renderAllHands() {
+            for (let h = 0; h < 5; h++) {
+                const handRow = document.getElementById(`hand-${h}`);
+                const buttons = handRow.querySelectorAll('.card-btn');
+                for (let c = 0; c < 5; c++) {
+                    const card = playerHands[h][c];
+                    const btn = buttons[c];
+                    
+                    if (!card) {
+                        btn.innerHTML = '';
+                        continue;
+                    }
+
+                    const redClass = card.suit.isRed ? 'class="red-suit"' : '';
+                    btn.innerHTML = `
+                        <span class="hold-tab">HELD</span>
+                        <div class="suit-top" ${redClass}>${card.value}${card.suit.symbol}</div>
+                        <div class="suit-center" ${redClass}>${card.suit.symbol}</div>
+                        <div class="suit-bottom" ${redClass}>${card.value}${card.suit.symbol}</div>
+                    `;
+
+                    // Keep baseline visibility clean
+                    if (h === 0 && cardHeldStates[c]) {
+                        btn.classList.add('held');
+                    } else {
+                        btn.classList.remove('held');
+                    }
+                }
+            }
+        }
+
+        // Core round switcher flow
+        function executeAction() {
+            if (!isDrawState) {
+                // Initial Deal execution path
+                if (credits < 25) {
+                    document.getElementById('status-display').textContent = "NOT ENOUGH CREDITS!";
+                    return;
+                }
+                credits -= 25;
+                document.getElementById('stat-credits').textContent = credits;
+                document.getElementById('stat-won').textContent = "0";
+
+                createDeck();
+                shuffleDeck();
+
+                // Clear constraints
+                cardHeldStates = [false, false, false, false, false];
+                
+                // Deal to baseline hands tracking structure
+                playerHands[0] = [dealCard(), dealCard(), dealCard(), dealCard(), dealCard()];
+                
+                // Mirror layout states into top subhands for standard multiplay setup
+                for (let h = 1; h < 5; h++) {
+                    playerHands[h] = [...playerHands[0]];
+                }
+
+                isDrawState = true;
+                actionButton.textContent = "DRAW";
+                document.getElementById('status-display').textContent = "SELECT CARDS TO HOLD";
+            } else {
+                // Draw sequence loop
+                // Keep base card modifications separate across all 5 independent deck processing loops
+                for (let h = 0; h < 5; h++) {
+                    for (let c = 0; c < 5; c++) {
+                        if (h === 0) {
+                            if (!cardHeldStates[c]) playerHands[0][c] = dealCard();
+                        } else {
+                            // Subhands retain whatever structural holds base layer assigned, replacing open values independently
+                            if (!cardHeldStates[c]) playerHands[h][c] = dealCard();
+                        }
+                    }
+                }
+
+                // Evaluate scores across all 5 distinct environments
+                let totalWin = 0;
+                let outcomeTexts = [];
+                
+                for (let h = 0; h < 5; h++) {
+                    const score = evaluatePokerHand(playerHands[h]);
+                    totalWin += score.payout;
+                    if(h === 0) outcomeTexts.push(score.label);
+                }
+
+                credits += totalWin;
+                document.getElementById('stat-credits').textContent = credits;
+                document.getElementById('stat-won').textContent = totalWin;
+                document.getElementById('status-display').textContent = `MAIN HAND: ${outcomeTexts[0]} | WON: ${totalWin}`;
+
+                isDrawState = false;
+                actionButton.textContent = "DEAL";
+            }
+            renderAllHands();
+            rebuildFocusSequenceMap();
+        }
+
+        // Basic structural payout mapping engine
+        function evaluatePokerHand(hand) {
+            const counts = {};
+            const suitsCount = {};
+            hand.forEach(c => {
+                counts[c.value] = (counts[c.value] || 0) + 1;
+                suitsCount[c.suit.name] = (suitsCount[c.suit.name] || 0) + 1;
+            });
+
+            const valuesSorted = hand.map(c => VALUES_RANK[c.value]).sort((a,b) => a-b);
+            
+            // Check flags
+            const isFlush = Object.keys(suitsCount).length === 1;
+            let isStraight = false;
+            
+            // Handle uniquely ordered lists checks
+            const uniqueVals = [...new Set(valuesSorted)];
+            if (uniqueVals.length === 5) {
+                if (valuesSorted[4] - valuesSorted[0] === 4) isStraight = true;
+                // Ace low configuration check (A,2,3,4,5)
+                if (valuesSorted[4] === 14 && valuesSorted[0] === 2 && valuesSorted[1] === 3 && valuesSorted[2] === 4 && valuesSorted[3] === 5) {
+                    isStraight = true;
+                }
+            }
+
+            const freq = Object.values(counts).sort((a,b) => b-a);
+            
+            if (isFlush && isStraight) {
+                if (valuesSorted[4] === 14 && valuesSorted[3] === 13) return { payout: 250, label: "ROYAL FLUSH" };
+                return { payout: 50, label: "STRAIGHT FLUSH" };
+            }
+            if (freq[0] === 4) return { payout: 25, label: "FOUR OF A KIND" };
+            if (freq[0] === 3 && freq[1] === 2) return { payout: 9, label: "FULL HOUSE" };
+            if (isFlush) return { payout: 6, label: "FLUSH" };
+            if (isStraight) return { payout: 4, label: "STRAIGHT" };
+            if (freq[0] === 3) return { payout: 3, label: "THREE OF A KIND" };
+            if (freq[0] === 2 && freq[1] === 2) return { payout: 2, label: "TWO PAIR" };
+            
+            if (freq[0] === 2) {
+                // Verify high value pairs
+                let highPair = false;
+                for (let v in counts) {
+                    if (counts[v] === 2 && ['J','Q','K','A'].includes(v)) highPair = true;
+                }
+                if (highPair) return { payout: 1, label: "JACKS OR BETTER" };
+            }
+
+            return { payout: 0, label: "HIGH CARD" };
+        }
+
+        // --- 3. HARDWARE CAPTURING LAYER (META GLASSES BRIDGING INTERFACE) ---
+        function rebuildFocusSequenceMap() {
+            // Re-aggregate list items target grids safely
+            const mainHandButtons = document.getElementById('hand-0').querySelectorAll('.card-btn');
+            
+            if (isDrawState) {
+                // While holding cards, map focuses circularly over base cards + actionable deal triggers
+                interactableElements = [...mainHandButtons, actionButton];
+            } else {
+                // If round resets, trap focus entirely onto action bar to enforce simplified loop mechanics
+                interactableElements = [actionButton];
+            }
+            
+            // Sanitize tracking indices boundaries gracefully
+            if (activeFocusIndex >= interactableElements.length) {
+                activeFocusIndex = 0;
+            }
+            interactableElements[activeFocusIndex].focus();
+        }
+
+        function launchGameEngine() {
+            overlay.style.display = 'none';
+            initializeHandLayouts();
+            rebuildFocusSequenceMap();
+            
+            // Explicit programmatic focus drop locks native element intercept sequences safely
+            setTimeout(() => {
+                interactableElements[activeFocusIndex].focus();
+            }, 100);
+        }
+
+        // Map base interactions to support standard pointer devices alongside standalone layers
+        document.getElementById('hand-0').addEventListener('click', (e) => {
+            const btn = e.target.closest('.card-btn');
+            if (!btn || !isDrawState) return;
+            
+            const idx = parseInt(btn.getAttribute('data-card-idx'));
+            cardHeldStates[idx] = !cardHeldStates[idx];
+            
+            // Sync structural visual pointers index matching layout configurations
+            activeFocusIndex = Array.from(interactableElements).indexOf(btn);
+            
+            renderAllHands();
+        });
+
+        actionButton.addEventListener('click', () => {
+            activeFocusIndex = interactableElements.indexOf(actionButton);
+            executeAction();
+        });
+
+        // Bridge Hardware Keyboards, Remotes and Meta Neural Wristband Event Dispatches
+        window.addEventListener('keydown', (event) => {
+            // Suppress browser baseline container window displacements while operating wearable runtime
+            if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Space', ' '].includes(event.key)) {
+                event.preventDefault();
+            }
+
+            if (overlay.style.display !== 'none') return;
+
+            if (event.key === 'ArrowRight') {
+                // Neural band swipe forward moves navigation focus ring down list sequence maps
+                activeFocusIndex = (activeFocusIndex + 1) % interactableElements.length;
+                interactableElements[activeFocusIndex].focus();
+            } 
+            else if (event.key === 'ArrowLeft') {
+                // Neural band swipe backward shifts navigation focus ring up list sequence maps
+                activeFocusIndex = (activeFocusIndex - 1 + interactableElements.length) % interactableElements.length;
+                interactableElements[activeFocusIndex].focus();
+            }
+            else if (event.key === 'Enter') {
+                // Meta Glasses hardware translates the "Index Pinch" gesture directly into an Enter key event.
+                // Fire programmatic activation trigger directly onto targeted focus vector item
+                if (interactableElements[activeFocusIndex]) {
+                    interactableElements[activeFocusIndex].click();
+                }
+            }
+            else if (event.key === ' ' || event.key === 'Spacebar') {
+                // Standard desktop developer fallback space trigger mappings
+                if (interactableElements[activeFocusIndex]) {
+                    interactableElements[activeFocusIndex].click();
+                }
+            }
+        });
+    </script>
+</body>
+</html>
